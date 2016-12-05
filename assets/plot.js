@@ -32,7 +32,7 @@ d3.json("graph.json", function(error, graph) {
   node = node.data(graph.nodes)
     .enter().append("circle")
       .attr("class", "node")
-      .attr("r", 12)
+      .attr("r", 10)
       .on("dblclick", dblclick)
       .call(drag);
 });
