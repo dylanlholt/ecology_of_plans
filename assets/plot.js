@@ -30,7 +30,7 @@ app = {
     id = 0;
 
     app.data.nodes = data.nodes.map(function(d){
-      return {x:d.x,y:d.y,id:id++,step:app.step}
+      return {x:d.x,y:d.y,id:id++,step:app.step,r:Math.floor(Math.random() * 10) + 10}
     });
     app.data.links = data.links;
     app.dataHistory.links = data.links
@@ -52,12 +52,14 @@ app = {
   },
 
   jumpToReview: function(){
-  if($('.active').text()!='Live'){
+  if($('.live').hasClass('active')==false){
     $('#fg').addClass('hide');
     $('#fgReview').removeClass('hide');
+    //$('.active').removeClass('active');
     app.components.forEach(function(c){if (c.launch) {c.launch();}});
   }
   else{
+    $('.active').removeClass('active');
     $('#fgReview').addClass('hide');
     $('#fg').removeClass('hide');
   }
@@ -73,17 +75,16 @@ controls.prototype = {
 
 create: function(){
 
-var mainButtons = d3.select('body')
+var mainButtons = d3.select('#controls')
         .selectAll('button')
         .data(app.btnData, function(d,i){return i})
 
 mainButtons.enter()
         .append('button')
         .text(function(d,i){return d.value})
-        .attr('class', function(d,i){return "btn"+(i+1)})
+        .attr('class', function(d){if(d.value=='Live'){return 'btn btn-default live'} else {return 'btn btn-default'}})
         .on('click', function(){
-          $('.active').removeClass('active');
-          $(this).addClass('active');
+          $(this).toggleClass('active');
           app.jumpToReview()});
   }
 
@@ -97,8 +98,8 @@ forceGraph.prototype = {
 
 setup: function(){
 
-var width = 1000,
-    height = 700
+var width = 1200
+    height = 600
 
     this.update()
 
@@ -106,8 +107,8 @@ var width = 1000,
 
 update: function(){
 
-var width = 1000,
-    height = 700
+var width = 1200
+    height = 600
 
 var force = d3.layout.force()
     .size([width, height])
@@ -145,7 +146,7 @@ console.log(graph.links)
     
   node1.enter().append("circle")
       .attr("class", "node pri")
-      .attr("r", function(){return Math.floor(Math.random() * 10) + 10;})
+      .attr("r", function(d){return d.r})
       .on("click", function(d,i){console.log(i)})
       .on("dblclick", dblclick)
       .call(drag);
@@ -185,7 +186,7 @@ function tick() {
       if(app.step==1){
   
       app.dataHistory.nodes = graph.nodes.map(function(d){
-         return {x:d.x,y:d.y,id:d.id,step:app.step}
+         return {x:d.x,y:d.y,id:d.id,step:app.step,r:d.r}
        })
 
       app.dataHistory.links = graph.links.map(function(d){
@@ -195,7 +196,7 @@ function tick() {
 
       else{
       app.dataHistory.nodes = app.dataHistory.nodes.concat(graph.nodes.map(function(d){
-         return {x:d.x,y:d.y,id:d.id,step:app.step}
+         return {x:d.x,y:d.y,id:d.id,step:app.step,r:d.r}
        }))
       app.dataHistory.links = app.dataHistory.links.concat(graph.links.map(function(d){
          return {x1:d.source.x,y1:d.source.y,x2:d.target.x,y2:d.target.y,step:app.step}
@@ -236,19 +237,25 @@ forceGraphReview.prototype = {
 
 setup: function(){
 
-var width = 1000,
-    height = 700
+var width = 1200
+    height = 600
 
 },
 
 launch: function(){
 
-var width = 1000,
-    height = 700
+var width = 1200
+    height = 600
 
-//d3.select('#fgReview').select('svg').remove();
+d3.select('#fgReview').select('svg').remove();
 
 var colors = ["red", "blue", "green", "yellow", "purple", "orange"]
+
+var selected = []
+
+$('.active').each(function(){selected.push(parseInt($(this).text()))});
+
+console.log(selected);
 
 var svg = d3.select("#fgReview").append("svg")
     .attr('id', 'Review')
@@ -258,19 +265,19 @@ var svg = d3.select("#fgReview").append("svg")
 var fgrlink = svg.selectAll(".fgrlink"),
     fgrnode = svg.selectAll(".fgrnode");
 
-  fgrlink = fgrlink.data(app.dataHistory.links.filter(function(d){return d.step < 4 }))
+  fgrlink = fgrlink.data(app.dataHistory.links.filter(function(d){return (selected.indexOf(d.step) > -1) }))
     .enter().append("line")
       .attr("class", "fgrlink");
 
-  fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id != 3 && d.step < 4 }))
+  fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id != 3 && (selected.indexOf(d.step) > -1) }))
     
   fgrnode1.enter().append("circle")
       .attr("class", "fgrnode")
-      .attr("r", function(){return Math.floor(Math.random() * 10) + 10;})
+      .attr("r", function(d){return d.r;})
       .attr('fill',function(d){return colors[d.step]})
       .on("click", function(d,i){console.log(i)})
 
-  fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id == 3 && d.step < 4 }))
+  fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id == 3 && (selected.indexOf(d.step) > -1) }))
     .enter().append("polygon")
       .attr("class", "node pub")
       //.attr("points", function(d){return d.x+','+d.y+' '(d.x+5)+','+(d.y-10)+' '+(d.x+10)+','+d.y})
