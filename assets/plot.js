@@ -23,6 +23,8 @@ app = {
 
   step: 0,
 
+  color: randomColor({count:50}),
+
   init: function(data){
 
     //console.log(data)
@@ -270,11 +272,13 @@ var fgrlink = svg.selectAll(".fgrlink"),
       .attr("class", "fgrlink");
 
   fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id != 3 && (selected.indexOf(d.step) > -1) }))
-    
+  
+//var color = randomColor({count:50});
+
   fgrnode1.enter().append("circle")
       .attr("class", "fgrnode")
       .attr("r", function(d){return d.r;})
-      .attr('fill',function(d){return colors[d.step]})
+      .attr('fill',function(d){return app.color[d.step]})
       .on("click", function(d,i){console.log(i)})
 
   fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id == 3 && (selected.indexOf(d.step) > -1) }))
@@ -284,7 +288,7 @@ var fgrlink = svg.selectAll(".fgrlink"),
       .on("click", function(d,i){console.log(d.id)})
 
   //console.log(force.alpha())
-  var colors = d3.scale.category10()
+  //var colors = d3.scale.category10()
 
   fgrlink.attr("x1", function(d) { return d.x1; })
       .attr("y1", function(d) { return d.y1; })
