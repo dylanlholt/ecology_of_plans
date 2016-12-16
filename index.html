@@ -7,6 +7,11 @@
   stroke-width: 1.5px;
 }
 
+.fgrlink {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
 .node.pri {
   cursor: move;
   fill: #ccc;
@@ -25,8 +30,17 @@
   fill: #f00;
 }
 
+.hide {
+	display: none
+}
+
 </style>
 <body>
+
+<div id='fg'></div>
+<div id='fgReview' class='hide'></div>
+
 <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js'></script>
+<script src='https://code.jquery.com/jquery-2.2.2.min.js' integrity='sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=' crossorigin='anonymous'></script>
 <script type="text/javascript" src="assets/plot.js"></script>
 </body>
