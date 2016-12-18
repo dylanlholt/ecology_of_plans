@@ -149,7 +149,7 @@ console.log(graph.links)
       .attr("class", "link")
       .style("stroke-width", function(d){return d.thickness});
 
-  node1 = node.data(graph.nodes.filter(function(d,i){return i != 3}), function(d){return d.id})
+  node1 = node.data(graph.nodes.filter(function(d,i){return [1,6,12].indexOf(d.id) == -1 }), function(d){return d.id})
     
   node1.enter().append("circle")
       .attr("class", "node pri")
@@ -158,7 +158,7 @@ console.log(graph.links)
       .on("dblclick", dblclick)
       .call(drag);
 
-  node2 = node.data(graph.nodes.filter(function(d,i){return i == 3}))
+  node2 = node.data(graph.nodes.filter(function(d,i){return [1,6,12].indexOf(d.id) > -1}))
     .enter().append("polygon")
       .attr("class", "node pub")
       //.attr("points", function(d){return d.x+','+d.y+' '(d.x+5)+','+(d.y-10)+' '+(d.x+10)+','+d.y})
@@ -292,7 +292,7 @@ var fgrlink = svg.selectAll(".fgrlink"),
       .attr("class", "fgrlink")
       .style("stroke-width", function(d){return d.thickness});
 
-  fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return i != 3 && (selected.indexOf(d.step) > -1) }))
+  fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return [1,6,12].indexOf(d.id) == -1 && (selected.indexOf(d.step) > -1) }))
   
 //var color = randomColor({count:50});
 
@@ -302,7 +302,7 @@ var fgrlink = svg.selectAll(".fgrlink"),
       .attr('fill',function(d){return app.color[d.step]})
       .on("click", function(d,i){console.log(i)})
 
-  fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return i == 3 && (selected.indexOf(d.step) > -1) }))
+  fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return [1,6,12].indexOf(d.id) > -1 && (selected.indexOf(d.step) > -1) }))
     .enter().append("polygon")
       .attr("class", "node pub")
       //.attr("points", function(d){return d.x+','+d.y+' '(d.x+5)+','+(d.y-10)+' '+(d.x+10)+','+d.y})
