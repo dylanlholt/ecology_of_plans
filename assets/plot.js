@@ -32,10 +32,12 @@ app = {
     id = 0;
 
     app.data.nodes = data.nodes.map(function(d){
-      return {x:d.x,y:d.y,id:id++,step:app.step,r:Math.floor(Math.random() * 10) + 10}
+      return {x:d.x,y:d.y,id:id++,step:app.step,r:Math.floor(Math.random() * 10) + 15}
     });
-    app.data.links = data.links;
-    app.dataHistory.links = data.links
+    app.data.links = data.links.map(function(d){
+      return {source:d.source, target:d.target, thickness: Math.floor(Math.random() * 5)+1}
+    });
+    app.dataHistory.links = app.data.links
 
     //console.log(app.data.nodes[70].id)
 
@@ -54,14 +56,14 @@ app = {
   },
 
   jumpToReview: function(){
-  if($('.live').hasClass('active')==false){
+  if($('.live').hasClass('act')==false){
     $('#fg').addClass('hide');
     $('#fgReview').removeClass('hide');
-    //$('.active').removeClass('active');
+    //$('.act').removeClass('act');
     app.components.forEach(function(c){if (c.launch) {c.launch();}});
   }
   else{
-    $('.active').removeClass('active');
+    $('.act').removeClass('act');
     $('#fgReview').addClass('hide');
     $('#fg').removeClass('hide');
   }
@@ -85,8 +87,9 @@ mainButtons.enter()
         .append('button')
         .text(function(d,i){return d.value})
         .attr('class', function(d){if(d.value=='Live'){return 'btn btn-default live'} else {return 'btn btn-default'}})
+        .style('background-color', function(d){if(d.value=='Live'){return 'red'} else {return app.color[d.value]}})
         .on('click', function(){
-          $(this).toggleClass('active');
+          $(this).toggleClass('act');
           app.jumpToReview()});
   }
 
@@ -101,7 +104,7 @@ forceGraph.prototype = {
 setup: function(){
 
 var width = 1200
-    height = 600
+    height = 500
 
     this.update()
 
@@ -110,12 +113,13 @@ var width = 1200
 update: function(){
 
 var width = 1200
-    height = 600
+    height = 500
 
 var force = d3.layout.force()
     .size([width, height])
     .charge(-400)
-    .linkDistance(40)
+    .linkDistance(50)
+    //.gravity(-0.01)
     .on("tick", tick);
 
 var drag = force.drag()
@@ -142,7 +146,8 @@ console.log(graph.links)
 
   link = link.data(graph.links)
     .enter().append("line")
-      .attr("class", "link");
+      .attr("class", "link")
+      .style("stroke-width", function(d){return d.thickness});
 
   node1 = node.data(graph.nodes.filter(function(d,i){return i != 3}), function(d){return d.id})
     
@@ -158,6 +163,16 @@ console.log(graph.links)
       .attr("class", "node pub")
       //.attr("points", function(d){return d.x+','+d.y+' '(d.x+5)+','+(d.y-10)+' '+(d.x+10)+','+d.y})
       .on("click", function(d,i){console.log(i)})
+
+  labels = svg.selectAll('.nodeText')
+      .data(graph.nodes, function(d){return d.id})
+      .enter()
+      .append("text")
+      .text(function (d) { return d.id; })
+      .style("text-anchor", "middle")
+      .style("fill", "#555")
+      .style("font-family", "Arial")
+      .style("font-size", 12);
 
 //console.log(graph.nodes.length);
 
@@ -175,8 +190,11 @@ function tick() {
   node1.attr("cx", function(d) { return d.x; })
       .attr("cy", function(d) { return d.y; })
 
-  node2.attr("points", function(d){return (d.x-12)+','+(d.y+12)+' '+(d.x)+','+(d.y-12)+' '+(d.x+12)+','+(d.y+12);})
+  node2.attr("points", function(d){return (d.x-18)+','+(d.y+18)+' '+(d.x)+','+(d.y-18)+' '+(d.x+18)+','+(d.y+18);})
        .classed("fixed", function(d){d.fixed = true})
+
+  labels.attr("x", function(d) { return d.x; })
+      .attr("y", function(d) { return d.y+5; })
 
   if (force.alpha() < 0.05){
       force.stop();
@@ -185,6 +203,8 @@ function tick() {
 
       console.log(app.step)
 
+      d3.selectAll(".node.pri").classed("fixed", function(d){d.fixed = false})
+
       if(app.step==1){
   
       app.dataHistory.nodes = graph.nodes.map(function(d){
@@ -192,7 +212,7 @@ function tick() {
        })
 
       app.dataHistory.links = graph.links.map(function(d){
-         return {x1:d.source.x,y1:d.source.y,x2:d.target.x,y2:d.target.y,step:app.step}
+         return {x1:d.source.x,y1:d.source.y,x2:d.target.x,y2:d.target.y,step:app.step,thickness:d.thickness}
         })
       }
 
@@ -201,7 +221,7 @@ function tick() {
          return {x:d.x,y:d.y,id:d.id,step:app.step,r:d.r}
        }))
       app.dataHistory.links = app.dataHistory.links.concat(graph.links.map(function(d){
-         return {x1:d.source.x,y1:d.source.y,x2:d.target.x,y2:d.target.y,step:app.step}
+         return {x1:d.source.x,y1:d.source.y,x2:d.target.x,y2:d.target.y,step:app.step,thickness:d.thickness}
         }))
       }
    
@@ -224,7 +244,9 @@ function tick() {
 function dblclick(d) {
   d3.select(this).classed("fixed", d.fixed = false);
 }
-
+function dragend(d) {
+  d3.select(this).classed("fixed", d.fixed = false);
+}
 function dragstart(d) {
   d3.select(this).classed("fixed", d.fixed = true);
 }
@@ -240,22 +262,20 @@ forceGraphReview.prototype = {
 setup: function(){
 
 var width = 1200
-    height = 600
+    height = 500
 
 },
 
 launch: function(){
 
 var width = 1200
-    height = 600
+    height = 500
 
 d3.select('#fgReview').select('svg').remove();
 
-var colors = ["red", "blue", "green", "yellow", "purple", "orange"]
-
 var selected = []
 
-$('.active').each(function(){selected.push(parseInt($(this).text()))});
+$('.act').each(function(){selected.push(parseInt($(this).text()))});
 
 console.log(selected);
 
@@ -269,9 +289,10 @@ var fgrlink = svg.selectAll(".fgrlink"),
 
   fgrlink = fgrlink.data(app.dataHistory.links.filter(function(d){return (selected.indexOf(d.step) > -1) }))
     .enter().append("line")
-      .attr("class", "fgrlink");
+      .attr("class", "fgrlink")
+      .style("stroke-width", function(d){return d.thickness});
 
-  fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id != 3 && (selected.indexOf(d.step) > -1) }))
+  fgrnode1 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return i != 3 && (selected.indexOf(d.step) > -1) }))
   
 //var color = randomColor({count:50});
 
@@ -281,11 +302,21 @@ var fgrlink = svg.selectAll(".fgrlink"),
       .attr('fill',function(d){return app.color[d.step]})
       .on("click", function(d,i){console.log(i)})
 
-  fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return d.id == 3 && (selected.indexOf(d.step) > -1) }))
+  fgrnode2 = fgrnode.data(app.dataHistory.nodes.filter(function(d,i){return i == 3 && (selected.indexOf(d.step) > -1) }))
     .enter().append("polygon")
       .attr("class", "node pub")
       //.attr("points", function(d){return d.x+','+d.y+' '(d.x+5)+','+(d.y-10)+' '+(d.x+10)+','+d.y})
       .on("click", function(d,i){console.log(d.id)})
+
+  fgrlabels = svg.selectAll('.nodeText')
+      .data(app.dataHistory.nodes.filter(function(d,i){return (selected.indexOf(d.step) > -1) }))
+      .enter()
+      .append("text")
+      .text(function (d) { return d.id; })
+      .style("text-anchor", "middle")
+      //.style("fill", "#555")
+      .style("font-family", "Arial")
+      .style("font-size", 12);
 
   //console.log(force.alpha())
   //var colors = d3.scale.category10()
@@ -298,7 +329,10 @@ var fgrlink = svg.selectAll(".fgrlink"),
   fgrnode1.attr("cx", function(d) { return d.x; })
       .attr("cy", function(d) { return d.y; })
 
-  fgrnode2.attr("points", function(d){return (d.x-12)+','+(d.y+12)+' '+(d.x)+','+(d.y-12)+' '+(d.x+12)+','+(d.y+12);})
+  fgrlabels.attr("x", function(d) { return d.x; })
+      .attr("y", function(d) { return d.y+5; })
+
+  fgrnode2.attr("points", function(d){return (d.x-18)+','+(d.y+18)+' '+(d.x)+','+(d.y-18)+' '+(d.x+18)+','+(d.y+18);})
 
 }
 }

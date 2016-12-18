@@ -12,7 +12,10 @@
     {"x": 539, "y": 222},
     {"x": 594, "y": 235},
     {"x": 582, "y": 185},
-    {"x": 633, "y": 200}
+    {"x": 633, "y": 200},
+    {"x": 473, "y": 190},
+    {"x": 350, "y": 232},
+    {"x": 502, "y": 300}
   ],
   "links": [
     {"source":  0, "target":  1},
@@ -32,6 +35,11 @@
     {"source":  9, "target": 10},
     {"source": 10, "target": 11},
     {"source": 11, "target": 12},
-    {"source": 12, "target": 10}
+    {"source": 12, "target": 10},
+    {"source": 10, "target":  0},
+    {"source": 11, "target":  6},
+    {"source": 12, "target": 13},
+    {"source": 12, "target": 14},
+    {"source": 12, "target": 15}
   ]
 }
